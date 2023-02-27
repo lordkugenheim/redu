@@ -3,6 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\PostsController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -14,20 +17,27 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('api')->group(function() {
+Route::controller(AuthController::class)->group(function () {
+    Route::post('register', 'register');
+    Route::post('login', 'login');
+});
 
-    Route::prefix('posts')->middleware('auth:sanctum')->group(function() {
-        Route::post('/', );
-        Route::post('/{id}/like');
-        Route::post('/{id}/unlike');
-        Route::post('/{id}');
+Route::prefix('posts')
+    ->middleware('auth:api')
+    ->controller(PostsController::class)
+    ->group(function() {
+        Route::post('/', 'getPosts');
+        Route::post('{id}/like', 'like');
+        Route::post('{id}/unlike', 'unlike');
+        Route::post('{id}', 'getPost');
     });
 
+/**
     Route::prefix('users')->middleware('auth:sanctum')->group(function() {
         Route::post('/', );
         Route::post('/{id}/follow');
         Route::post('/{id}/unfollow');
         Route::post('/{id}');
     });
+*/
 
-});
