@@ -27,9 +27,9 @@ Route::prefix('posts')
     ->controller(PostsController::class)
     ->group(function() {
         Route::post('/', 'getPosts');
-        Route::post('{id}/like', 'like');
-        Route::post('{id}/unlike', 'unlike');
-        Route::post('{id}', 'getPost');
+        Route::post('/{id}/like', 'like');
+        Route::post('/{id}/unlike', 'unlike');
+        Route::post('/{id}', 'getPost');
     });
 
 /**
