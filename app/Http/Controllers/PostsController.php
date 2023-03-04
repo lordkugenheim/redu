@@ -10,14 +10,6 @@ use App\Models\Post;
 
 class PostsController extends Controller
 {
-
-    private $PostModel = '';
-
-    public function __construct()
-    {
-        $PostModel = new PostModel();
-    }
-
     public function getPost($post_id)
     {
         $posts = Post::where('id', $post_id)
@@ -39,18 +31,31 @@ class PostsController extends Controller
 
     public function getPosts()
     {
-        // return a list of all the posts from all the people the authenticated user has followed
+        $followers = User::where('id', Auth::user()->id)
+            ->with('followers')
+            ->get()
+            ->pluck('followers')
+            ->first()
+            ->pluck('follower_id')
+            ->toArray();
 
-        $user = new User();
-        $query = $user->where('id', Auth::user()->id)->with('posts')->get();
+        $posts = Post::whereIn('user_id', $followers)
+            ->get();
 
-        dd($query);
-    
+        return response([
+            'status' => 'success',
+            'posts' => $posts
+        ]);
     }
 
     public function like()
     {
-        die('hayo');
+        User::where('id', Auth::user()->id)
+            ->first()
+            ->followers()
+            ->updateOrCreate([
+                'following_id' => $user_id
+            ]);
     }
 
     public function unlike()

@@ -42,7 +42,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function follower(): HasMany
+    public function followers()
     {
         return $this->hasMany(Follower::class, 'follower_id');
     }
@@ -51,5 +51,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Post::class);
     }
-
 }
