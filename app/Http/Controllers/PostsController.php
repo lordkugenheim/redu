@@ -48,18 +48,24 @@ class PostsController extends Controller
         ]);
     }
 
-    public function like()
+    public function like($post_id)
     {
         User::where('id', Auth::user()->id)
             ->first()
-            ->followers()
+            ->likes()
             ->updateOrCreate([
-                'following_id' => $user_id
+                'post_id' => $post_id
             ]);
     }
 
-    public function unlike()
+    public function unlike($post_id)
     {
-        die('hayo');
+        User::where('id', Auth::user()->id)
+            ->first()
+            ->likes()        
+            ->where([
+                'likes.post_id' => $post_id
+            ])
+            ->delete();
     }
 }
