@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\PostsController;
+use App\Http\Controllers\UsersController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,9 +18,10 @@ use App\Http\Controllers\PostsController;
 |
 */
 
-Route::controller(AuthController::class)->group(function () {
-    Route::post('register', 'register');
-    Route::post('login', 'login');
+Route::controller(AuthController::class)
+    ->group(function () {
+        Route::post('register', 'register');
+        Route::post('login', 'login');
 });
 
 Route::prefix('posts')
@@ -32,12 +34,13 @@ Route::prefix('posts')
         Route::post('/{id}', 'getPost');
     });
 
-/**
-    Route::prefix('users')->middleware('auth:sanctum')->group(function() {
-        Route::post('/', );
-        Route::post('/{id}/follow');
-        Route::post('/{id}/unfollow');
-        Route::post('/{id}');
+Route::prefix('users')
+    ->middleware('auth:api')
+    ->controller(UsersController::class)
+    ->group(function() {
+        Route::post('/', 'getUsers');
+        Route::post('/{id}/follow', 'followUser');
+        Route::post('/{id}/unfollow', 'unfollowUser');
+        Route::post('/{id}', 'getUser');
     });
-*/
 
