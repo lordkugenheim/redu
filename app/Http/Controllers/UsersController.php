@@ -18,12 +18,12 @@ class UsersController extends Controller
 
     public function getUser($user_id)
     {
+        $select_fields = ['id', 'name'];
+        
+        Auth::user()->id == $user_id ? array_push($select_fields, ['email']) : '';
+
         $data = User::where('id', $user_id)
-            ->first([
-                'id',
-                'name',
-                Auth::user()->id == $user_id ? 'email' : ''
-            ])
+            ->first($select_fields)
             ->toArray();
 
         if (Auth::user()->id == $user_id) {
