@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Auth;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use App\Models\Post as PostModel;
 use App\Models\User;
@@ -11,7 +12,15 @@ use App\Models\Like;
 
 class PostsController extends Controller
 {
-    public function getPost($post_id)
+    /**
+     * Return a single post
+     * 
+     * /api/posts/{id}
+     * 
+     * @param int $post_id
+     * @return Response
+     */
+    public function getPost($post_id): Response
     {
         $posts = Post::select(    
                 'id',
