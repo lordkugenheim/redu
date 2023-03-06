@@ -7,25 +7,32 @@ use Illuminate\Http\Request;
 use App\Models\Post as PostModel;
 use App\Models\User;
 use App\Models\Post;
+use App\Models\Like;
 
 class PostsController extends Controller
 {
     public function getPost($post_id)
     {
-        $posts = Post::where('id', $post_id)
-            ->get([
+        $posts = Post::select(    
                 'id',
                 'content',
                 'user_id'
-            ])
+            )
+            ->where('id', $post_id)
+            ->withCount('likes')
+            ->orderBy('created_at', 'DESC')
+            ->first()
             ->toArray();
 
-            // total number of likes across all users
-            // has the authenticated user liked it
+        $like = Like::where('user_id', Auth::user()->id)
+            ->where('post_id', $post_id)
+            ->get();
+
+        $posts['user_liked'] = !$like->isEmpty();
 
         return response([
             'status' => 'success',
-            'posts' => $posts
+            'data' => $posts
         ]);
     }
 
