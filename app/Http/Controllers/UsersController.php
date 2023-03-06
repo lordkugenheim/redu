@@ -18,20 +18,32 @@ class UsersController extends Controller
 
     public function getUser($user_id)
     {
-        $user = User::where('id', $user_id)
-            ->get([
+        $data = User::where('id', $user_id)
+            ->first([
                 'id',
                 'name',
-                'email'
+                Auth::user()->id == $user_id ? 'email' : ''
             ])
             ->toArray();
 
-            // Follower/Following count when your own profile
-            // email when your own profile
+        if (Auth::user()->id == $user_id) {
+
+            $followers_count = Follower::where('following_id', Auth::user()->id)
+                ->count();
+
+            $following_count = Follower::where('follower_id', Auth::user()->id)
+                ->count();
+
+            $data = array_merge($data, [
+                'followers_count' => $followers_count,
+                'following_count' => $following_count
+            ]);
+
+        }
 
         return response([
             'status' => 'success',
-            'user' => $user
+            'data' => $data
         ]);
     }
 
