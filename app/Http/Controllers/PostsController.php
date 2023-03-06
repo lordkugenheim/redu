@@ -45,7 +45,14 @@ class PostsController extends Controller
         ]);
     }
 
-    public function getPosts()
+    /*
+     * Return all posts of users that the authenticated user has followed
+     * 
+     * /api/posts
+     * 
+     * @return Response
+     */
+    public function getPosts(): Response
     {
         $followers = User::where('id', Auth::user()->id)
             ->with('followers')
@@ -55,12 +62,18 @@ class PostsController extends Controller
             ->pluck('follower_id')
             ->toArray();
 
-        $posts = Post::whereIn('user_id', $followers)
+        $posts = Post::select(
+                'id',
+                'content',
+                'user_id'
+            )
+            ->whereIn('user_id', $followers)
+            ->withCount('likes')
             ->get();
 
         return response([
             'status' => 'success',
-            'posts' => $posts
+            'data' => $posts
         ]);
     }
 
