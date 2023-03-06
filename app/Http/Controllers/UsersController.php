@@ -53,12 +53,25 @@ class UsersController extends Controller
                 'id',
                 'name',
                 'email'
-            ])
-            ->toArray();
+            ]);
 
-            // Same thing as single endpoint only for all users, authenticated user has extra fields
-            // Follower/Following count when your own profile
-            // email when your own profile
+        $users->map(function($user) {
+           
+            if ($user->id == Auth::user()->id) {
+
+                $user->followers_count = Follower::where('following_id', Auth::user()->id)
+                    ->count();
+
+                $user->following_count = Follower::where('follower_id', Auth::user()->id)
+                    ->count();
+
+            } else {
+                unset($user->email);
+            }
+
+            return $user;
+
+        });
 
         return response([
             'status' => 'success',
