@@ -46,6 +46,56 @@ class PostsController extends Controller
     }
 
     /**
+     * Create a Post
+     * 
+     * Only available to authenticated users
+     * 
+     * @method PUT
+     * /api/posts
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function createPost(Request $request): Response 
+    {
+        if (!Auth::user()->id) {
+
+            return response([
+                'status' => 'error',
+                'message' => 'Authentication required'
+            ], 401);
+
+        }
+
+        if ($request->content == '' || !isset($request->content)) {
+
+            return response([
+                'status' => 'error',
+                'message' => 'Missing or incomplete parameter: Content'
+            ], 400);
+
+        }
+
+        $id = Post::create([
+            'user_id' => Auth::user()->id,
+            'content' => $request->content
+        ]);
+
+        if ($id) {
+            return response([
+                'status' => 'success',
+                'message' => 'Post ' . $id . ' was created successfully'
+            ]);
+        }
+        
+        return response([
+            'status' => 'error',
+            'message' => 'An error occured, please try again'
+        ], 500);
+
+    }
+
+    /**
      * Return all posts of users that the authenticated user has followed
      * 
      * /api/posts
