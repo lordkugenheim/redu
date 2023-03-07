@@ -50,10 +50,10 @@ class UsersController extends Controller
     public function getUsers()
     {
         $users = User::get([
-                'id',
-                'name',
-                'email'
-            ]);
+            'id',
+            'name',
+            'email'
+        ]);
 
         $users->map(function($user) {
            
@@ -72,6 +72,9 @@ class UsersController extends Controller
             return $user;
 
         });
+
+        $users->chunk(10)
+            ->toArray();
 
         return response([
             'status' => 'success',

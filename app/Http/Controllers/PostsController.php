@@ -69,7 +69,9 @@ class PostsController extends Controller
             )
             ->whereIn('user_id', $followers)
             ->withCount('likes')
-            ->get();
+            ->get()
+            ->chunk(10)
+            ->toArray();
 
         return response([
             'status' => 'success',
@@ -77,14 +79,31 @@ class PostsController extends Controller
         ]);
     }
 
+    /*
+     * 'Like' a single post
+     * 
+     * only available to authenticated users
+     * 
+     * /api/posts/{id}/like
+     * 
+     * @return Response
+     */
     public function like($post_id)
     {
-        User::where('id', Auth::user()->id)
-            ->first()
-            ->likes()
-            ->updateOrCreate([
-                'post_id' => $post_id
-            ]);
+        if (Auth::user()->id) {
+
+            User::where('id', Auth::user()->id)
+                ->first()
+                ->likes()
+                ->updateOrCreate([
+                    'post_id' => $post_id
+                ]); 
+
+            return response([
+                'status' => 'success',
+                'message' => 'Like added to post ID: ' . $post_id
+            ])
+        }
     }
 
     public function unlike($post_id)
