@@ -102,18 +102,36 @@ class PostsController extends Controller
             return response([
                 'status' => 'success',
                 'message' => 'Like added to post ID: ' . $post_id
-            ])
+            ]);
         }
+
+        return response([
+            'status' => 'error',
+            'message' => 'Authentication required'
+        ], 401);
     }
 
     public function unlike($post_id)
     {
-        User::where('id', Auth::user()->id)
-            ->first()
-            ->likes()        
-            ->where([
-                'likes.post_id' => $post_id
-            ])
-            ->delete();
+        if (Auth::user()->id) {
+
+            User::where('id', Auth::user()->id)
+                ->first()
+                ->likes()        
+                ->where([
+                    'likes.post_id' => $post_id
+                ])
+                ->delete();
+
+            return response([
+                'status' => 'success',
+                'message' => 'Like removed from post ID: ' . $post_id
+            ]);
+        }
+
+        return response([
+            'status' => 'error',
+            'message' => 'Authentication required'
+        ], 401);
     }
 }
