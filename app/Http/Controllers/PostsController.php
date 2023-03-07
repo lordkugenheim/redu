@@ -45,7 +45,7 @@ class PostsController extends Controller
         ]);
     }
 
-    /*
+    /**
      * Return all posts of users that the authenticated user has followed
      * 
      * /api/posts
@@ -79,16 +79,17 @@ class PostsController extends Controller
         ]);
     }
 
-    /*
+    /**
      * 'Like' a single post
      * 
      * only available to authenticated users
      * 
      * /api/posts/{id}/like
-     * 
+     *
+     * @param int $post_id
      * @return Response
      */
-    public function like($post_id)
+    public function like($post_id): Response
     {
         if (Auth::user()->id) {
 
@@ -111,7 +112,17 @@ class PostsController extends Controller
         ], 401);
     }
 
-    public function unlike($post_id)
+    /**
+     * 'Unlike' a single post
+     * 
+     * only available to authenticated users
+     * 
+     * /api/posts/{id}/unlike
+     * 
+     * @param int $post_id
+     * @return Response
+     */
+    public function unlike($post_id): Response
     {
         if (Auth::user()->id) {
 
