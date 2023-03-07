@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Auth;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use App\Models\Post as PostModel;
 use App\Models\User;
@@ -10,13 +11,18 @@ use App\Models\Follower;
 
 class UsersController extends Controller
 {
-    public function __construct()
-    {
-        // add the authenticated user model in here
-        // save checking that in each endpoint
-    }
-
-    public function getUser($user_id)
+    /**
+     * Retrieve a single user profile
+     * 
+     * Authenticated users retrieving their own profile 
+     * have 'email', 'followers_count' and 'following_count' included
+     * 
+     * /api/users/{id}
+     * 
+     * @param int $user_id
+     * @return Response
+     */
+    public function getUser($user_id): Response
     {
         $select_fields = ['id', 'name'];
         
@@ -47,7 +53,18 @@ class UsersController extends Controller
         ]);
     }
 
-    public function getUsers()
+    /**
+     * Retrieve all users
+     * 
+     * Authenticated users 
+     * have 'email', 'followers_count' and 'following_count'
+     * included on their own profile entry
+     * 
+     * /api/users
+     *
+     * @return Response
+     */
+    public function getUsers(): Response
     {
         $users = User::get([
             'id',
@@ -82,24 +99,70 @@ class UsersController extends Controller
         ]);
     }
 
-    public function followUser($user_id)
+    /**
+     * 'Follow' a user
+     * 
+     * only available to authenticated users
+     * 
+     * /api/users/{id}/follow
+     * 
+     * @param int $user_id
+     * @return Response
+     */
+    public function followUser($user_id): Response
     {
-        User::where('id', Auth::user()->id)
-            ->first()
-            ->followers()
-            ->updateOrCreate([
-                'following_id' => $user_id
+        if (Auth::user()->id) {
+
+            User::where('id', Auth::user()->id)
+                ->first()
+                ->followers()
+                ->updateOrCreate([
+                    'following_id' => $user_id
+                ]);
+
+            return response([
+                'status' => 'success',
+                'message' => 'Follow added for profile ' . $user_id
             ]);
+        }
+
+        return response([
+            'status' => 'error',
+            'message' => 'Authentication required'
+        ], 401);
     }
 
-    public function unfollowUser($user_id)
+    /**
+     * 'Unfollow' a user
+     * 
+     * only available to authenticated users
+     * 
+     * /api/users/{id}/unfollow
+     * 
+     * @param int $user_id
+     * @return Response
+     */
+    public function unfollowUser($user_id): Response
     {
-        User::where('id', Auth::user()->id)
-            ->first()
-            ->followers()
-            ->where([
-                'followers.following_id' => $user_id
-            ])
-            ->delete();
+        if (Auth::user()->id) {
+
+            User::where('id', Auth::user()->id)
+                ->first()
+                ->followers()
+                ->where([
+                    'followers.following_id' => $user_id
+                ])
+                ->delete();
+
+            return response([
+                'status' => 'success',
+                'message' => 'Follow removed for profile ' . $user_id
+            ]);
+        }
+
+        return response([
+            'status' => 'error',
+            'message' => 'Authentication required'
+        ], 401);
     }
 }
