@@ -14,6 +14,8 @@ class UsersController extends Controller
     /**
      * Retrieve a single user profile
      * 
+     * Only available to authenticated users
+     * 
      * Authenticated users retrieving their own profile 
      * have 'email', 'followers_count' and 'following_count' included
      * 
@@ -24,37 +26,47 @@ class UsersController extends Controller
      */
     public function getUser($user_id): Response
     {
-        $select_fields = ['id', 'name'];
-        
-        Auth::user()->id == $user_id ? array_push($select_fields, ['email']) : '';
+        if (Auth::user()->id) {
 
-        $data = User::where('id', $user_id)
-            ->first($select_fields)
-            ->toArray();
+            $select_fields = ['id', 'name'];
+            
+            Auth::user()->id == $user_id ? array_push($select_fields, ['email']) : '';
 
-        if (Auth::user()->id == $user_id) {
+            $data = User::where('id', $user_id)
+                ->first($select_fields)
+                ->toArray();
 
-            $followers_count = Follower::where('following_id', Auth::user()->id)
-                ->count();
+            if (Auth::user()->id == $user_id) {
 
-            $following_count = Follower::where('follower_id', Auth::user()->id)
-                ->count();
+                $followers_count = Follower::where('following_id', Auth::user()->id)
+                    ->count();
 
-            $data = array_merge($data, [
-                'followers_count' => $followers_count,
-                'following_count' => $following_count
+                $following_count = Follower::where('follower_id', Auth::user()->id)
+                    ->count();
+
+                $data = array_merge($data, [
+                    'followers_count' => $followers_count,
+                    'following_count' => $following_count
+                ]);
+
+            }
+
+            return response([
+                'status' => 'success',
+                'data' => $data
             ]);
-
         }
 
         return response([
-            'status' => 'success',
-            'data' => $data
-        ]);
+            'status' => 'error',
+            'message' => 'Authentication required'
+        ], 401);
     }
 
     /**
      * Retrieve all users
+     * 
+     * Only available to authenticated users
      * 
      * Authenticated users 
      * have 'email', 'followers_count' and 'following_count'
@@ -66,37 +78,46 @@ class UsersController extends Controller
      */
     public function getUsers(): Response
     {
-        $users = User::get([
-            'id',
-            'name',
-            'email'
-        ]);
+        if (Auth::user()->id) {
 
-        $users->map(function($user) {
-           
-            if ($user->id == Auth::user()->id) {
+            $users = User::get([
+                'id',
+                'name',
+                'email'
+            ]);
 
-                $user->followers_count = Follower::where('following_id', Auth::user()->id)
-                    ->count();
+            $users->map(function($user) {
+            
+                if ($user->id == Auth::user()->id) {
 
-                $user->following_count = Follower::where('follower_id', Auth::user()->id)
-                    ->count();
+                    $user->followers_count = Follower::where('following_id', Auth::user()->id)
+                        ->count();
 
-            } else {
-                unset($user->email);
-            }
+                    $user->following_count = Follower::where('follower_id', Auth::user()->id)
+                        ->count();
 
-            return $user;
+                } else {
+                    unset($user->email);
+                }
 
-        });
+                return $user;
 
-        $users->chunk(10)
-            ->toArray();
+            });
+
+            $users->chunk(10)
+                ->toArray();
+
+            return response([
+                'status' => 'success',
+                'users' => $users
+            ]);
+        }
 
         return response([
-            'status' => 'success',
-            'users' => $users
-        ]);
+            'status' => 'error',
+            'message' => 'Authentication required'
+        ], 401);
+
     }
 
     /**
